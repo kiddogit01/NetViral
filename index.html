@@ -1,0 +1,1573 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>NetViral</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+--bg:#080f1c;--bg2:#0d1829;--bg3:#111f35;--bg4:#17263f;
+--glass:rgba(13,24,41,0.7);--glass2:rgba(20,35,60,0.5);
+--cyan:#00e5ff;--cyan2:#4ab8ff;--cyan3:rgba(0,229,255,0.15);
+--cyan4:rgba(0,229,255,0.08);--cyanGlow:rgba(0,229,255,0.3);
+--green:#00e676;--red:#ff1744;--yellow:#ffd600;--purple:#d500f9;
+--t1:#ffffff;--t2:#c8d8f0;--t3:#7a9bb8;--t4:#3a5a78;
+--b1:rgba(0,229,255,0.18);--b2:rgba(0,229,255,0.35);
+--r8:8px;--r12:12px;--r16:16px;--r20:20px;--r50:50px;
+--blur:blur(16px);--blur2:blur(8px);
+--shadow:0 8px 32px rgba(0,0,0,0.4);
+--glow:0 0 20px rgba(0,229,255,0.25);
+}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--t1);font-family:'DM Sans',sans-serif}
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--b1);border-radius:4px}
+/* BG ANIMATED */
+.bg-layer{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.bg-orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.35;animation:orbFloat 8s ease-in-out infinite}
+.bg-orb:nth-child(1){width:400px;height:400px;background:radial-gradient(circle,rgba(0,229,255,0.4),transparent 70%);top:-100px;left:-100px;animation-delay:0s}
+.bg-orb:nth-child(2){width:300px;height:300px;background:radial-gradient(circle,rgba(74,184,255,0.3),transparent 70%);bottom:-80px;right:-80px;animation-delay:-3s}
+.bg-orb:nth-child(3){width:200px;height:200px;background:radial-gradient(circle,rgba(213,0,249,0.2),transparent 70%);top:50%;left:50%;animation-delay:-5s}
+@keyframes orbFloat{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(20px,-20px) scale(1.05)}}
+/* SCREENS */
+.screen{position:fixed;inset:0;z-index:10;display:none;flex-direction:column;overflow:hidden}
+.screen.active{display:flex}
+/* PERMISSIONS */
+#s-perm{background:linear-gradient(160deg,#080f1c 0%,#0d1829 100%);align-items:center;justify-content:center;padding:32px 24px}
+.perm-logo{text-align:center;margin-bottom:40px}
+.perm-logo .app-name{font-family:'Syne',sans-serif;font-size:42px;font-weight:800;color:var(--cyan);letter-spacing:-1px;text-shadow:var(--glow)}
+.perm-logo .app-sub{font-size:14px;color:var(--t3);margin-top:4px}
+.perm-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;text-align:center;margin-bottom:8px}
+.perm-desc{font-size:14px;color:var(--t3);text-align:center;margin-bottom:32px;line-height:1.6}
+.perm-list{width:100%;max-width:400px;display:flex;flex-direction:column;gap:12px;margin-bottom:32px}
+.perm-item{background:var(--glass);backdrop-filter:var(--blur);border:1px solid var(--b1);border-radius:var(--r12);padding:16px 20px;display:flex;align-items:center;gap:16px;transition:all .3s}
+.perm-item.granted{border-color:rgba(0,230,118,0.4);background:rgba(0,230,118,0.05)}
+.perm-icon{font-size:24px;width:44px;height:44px;background:var(--cyan3);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.perm-info{flex:1}
+.perm-info h4{font-size:15px;font-weight:600;margin-bottom:2px}
+.perm-info p{font-size:12px;color:var(--t3);line-height:1.4}
+.perm-check{font-size:20px;color:var(--green);transition:all .3s}
+.perm-check.pending{color:var(--t4);font-size:16px}
+/* LOGIN */
+#s-login{background:linear-gradient(160deg,#080f1c 0%,#0d1829 100%);align-items:center;justify-content:center;padding:32px 24px}
+.login-box{width:100%;max-width:380px;text-align:center}
+.login-logo{margin-bottom:48px}
+.login-logo .app-name{font-family:'Syne',sans-serif;font-size:52px;font-weight:800;color:var(--cyan);letter-spacing:-2px;text-shadow:var(--glow)}
+.login-logo .tagline{font-size:15px;color:var(--t3);margin-top:8px}
+.login-title{font-family:'Syne',sans-serif;font-size:26px;font-weight:700;margin-bottom:8px}
+.login-sub{font-size:14px;color:var(--t3);margin-bottom:40px;line-height:1.6}
+/* SETUP */
+#s-setup{background:var(--bg);overflow-y:auto}
+.setup-wrap{padding:48px 24px 32px;max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;justify-content:center}
+.setup-step{font-size:12px;color:var(--cyan);letter-spacing:2px;font-weight:600;margin-bottom:12px;text-transform:uppercase}
+/* PENDING */
+#s-pending{background:var(--bg);align-items:center;justify-content:center;padding:32px 24px;text-align:center}
+/* MAIN APP */
+#s-app{background:var(--bg);flex-direction:column}
+/* TOPBAR */
+.topbar{height:64px;background:rgba(8,15,28,0.95);backdrop-filter:var(--blur);border-bottom:1px solid var(--b1);display:flex;align-items:center;justify-content:space-between;padding:0 20px;flex-shrink:0;z-index:50}
+.topbar-logo{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--cyan);letter-spacing:-0.5px}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.pts-chip{background:var(--cyan3);border:1px solid var(--b1);border-radius:var(--r50);padding:6px 14px;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--cyan)}
+.pts-chip span{font-size:16px}
+.notif-btn{width:38px;height:38px;background:var(--glass);border:1px solid var(--b1);border-radius:var(--r8);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;transition:all .2s}
+.notif-btn:hover{border-color:var(--b2);background:var(--cyan3)}
+/* TABS */
+.tabs{display:flex;background:rgba(8,15,28,0.95);backdrop-filter:var(--blur);border-top:1px solid var(--b1);height:64px;flex-shrink:0}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;transition:all .3s;position:relative;font-size:10px;font-weight:600;color:var(--t4);letter-spacing:.5px;text-transform:uppercase}
+.tab svg,.tab .tab-ico{font-size:22px;transition:all .3s}
+.tab.active{color:var(--cyan)}
+.tab.active::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:32px;height:2px;background:var(--cyan);border-radius:0 0 4px 4px;box-shadow:0 0 10px var(--cyan)}
+/* TAB CONTENT */
+.tab-content{flex:1;overflow:hidden;display:none;flex-direction:column}
+.tab-content.active{display:flex}
+/* FEED */
+#tc-feed{overflow-y:auto;padding:16px}
+.feed-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.feed-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:700}
+.feed-filter{display:flex;gap:8px}
+.filt-btn{padding:6px 14px;border-radius:var(--r50);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;border:1px solid var(--b1);background:transparent;color:var(--t3)}
+.filt-btn.active{background:var(--cyan3);border-color:var(--b2);color:var(--cyan)}
+.streak-bar{background:var(--glass);backdrop-filter:var(--blur2);border:1px solid var(--b1);border-radius:var(--r12);padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+.streak-left{display:flex;align-items:center;gap:10px}
+.streak-ico{font-size:28px}
+.streak-info h4{font-size:14px;font-weight:600;margin-bottom:2px}
+.streak-info p{font-size:12px;color:var(--t3)}
+.streak-days{display:flex;gap:6px}
+.streak-day{width:28px;height:28px;border-radius:8px;background:var(--bg4);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--t4)}
+.streak-day.done{background:rgba(0,230,118,0.15);border-color:rgba(0,230,118,0.4);color:var(--green)}
+.streak-day.today{background:var(--cyan3);border-color:var(--b2);color:var(--cyan);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 var(--cyanGlow)}50%{box-shadow:0 0 0 4px transparent}}
+/* VIDEO CARD */
+.vcard{background:var(--glass);backdrop-filter:var(--blur);border:1px solid var(--b1);border-radius:var(--r16);overflow:hidden;margin-bottom:14px;transition:all .3s;animation:fadeUp .4s ease-out forwards;opacity:0}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.vcard:nth-child(1){animation-delay:.05s}
+.vcard:nth-child(2){animation-delay:.1s}
+.vcard:nth-child(3){animation-delay:.15s}
+.vcard:nth-child(4){animation-delay:.2s}
+.vcard:nth-child(5){animation-delay:.25s}
+.vcard:hover{border-color:var(--b2);box-shadow:var(--glow)}
+.vcard-thumb{position:relative;width:100%;height:180px;overflow:hidden}
+.vcard-thumb img{width:100%;height:100%;object-fit:cover}
+.vcard-thumb-bg{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:48px}
+.vcard-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,transparent 40%,rgba(8,15,28,0.9) 100%)}
+.vcard-platform{position:absolute;top:10px;left:10px;padding:4px 10px;border-radius:var(--r50);font-size:11px;font-weight:700;letter-spacing:.5px}
+.vcard-platform.tiktok{background:rgba(0,0,0,0.7);color:#ffffff;border:1px solid rgba(255,255,255,0.2)}
+.vcard-platform.youtube{background:rgba(255,0,0,0.8);color:#ffffff}
+.vcard-boost-badge{position:absolute;top:10px;right:10px;background:rgba(0,230,118,0.2);border:1px solid rgba(0,230,118,0.5);color:var(--green);padding:4px 10px;border-radius:var(--r50);font-size:11px;font-weight:700}
+.vcard-pts-preview{position:absolute;bottom:10px;right:10px;background:rgba(0,229,255,0.2);border:1px solid var(--b1);color:var(--cyan);padding:4px 10px;border-radius:var(--r50);font-size:12px;font-weight:700;backdrop-filter:var(--blur2)}
+.vcard-body{padding:14px 16px}
+.vcard-meta{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.vcard-avatar{width:28px;height:28px;border-radius:50%;background:var(--cyan3);border:1.5px solid var(--b2);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.vcard-user{font-size:13px;font-weight:600;color:var(--cyan)}
+.vcard-time{font-size:11px;color:var(--t4);margin-left:auto}
+.vcard-title{font-size:15px;font-weight:600;line-height:1.4;margin-bottom:10px}
+/* TRACKER */
+.tracker-wrap{margin-bottom:12px}
+.tracker-top{display:flex;justify-content:space-between;margin-bottom:6px}
+.tracker-label{font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.tracker-val{font-size:12px;font-weight:700;color:var(--cyan)}
+.tracker-bar{height:5px;background:var(--bg4);border-radius:3px;overflow:hidden}
+.tracker-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--cyan),var(--cyan2));box-shadow:0 0 8px var(--cyanGlow);transition:width .6s ease}
+/* ACTION ROW */
+.vcard-actions{display:flex;gap:8px;flex-wrap:wrap}
+.act-btn{flex:1;min-width:calc(50% - 4px);padding:10px 8px;border-radius:var(--r8);border:1px solid var(--b1);background:var(--cyan3);color:var(--cyan);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px}
+.act-btn:hover{background:var(--b2);border-color:var(--b2);box-shadow:var(--glow)}
+.act-btn.primary{background:var(--cyan);color:var(--bg);border-color:var(--cyan);flex:2}
+.act-btn.primary:hover{background:var(--cyan2)}
+/* ORDERS */
+#tc-orders{overflow-y:auto;padding:16px}
+.order-card{background:var(--glass);backdrop-filter:var(--blur);border:1px solid var(--b1);border-radius:var(--r12);padding:16px;margin-bottom:12px;transition:all .3s}
+.order-card:hover{border-color:var(--b2)}
+.order-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.order-type{display:flex;align-items:center;gap:8px}
+.order-ico{font-size:20px;width:38px;height:38px;background:var(--cyan3);border-radius:var(--r8);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.order-info h4{font-size:14px;font-weight:600;margin-bottom:2px}
+.order-info p{font-size:12px;color:var(--t3)}
+.order-status{padding:4px 10px;border-radius:var(--r50);font-size:11px;font-weight:700}
+.status-active{background:rgba(0,230,118,0.15);color:var(--green);border:1px solid rgba(0,230,118,0.3)}
+.status-pending{background:rgba(255,214,0,0.15);color:var(--yellow);border:1px solid rgba(255,214,0,0.3)}
+.status-done{background:var(--bg3);color:var(--t4);border:1px solid var(--b1)}
+/* SHOP */
+#tc-shop{overflow-y:auto;padding:16px}
+.shop-section{margin-bottom:24px}
+.shop-section-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.lv-packages{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pkg-card{background:var(--glass);backdrop-filter:var(--blur);border:1px solid var(--b1);border-radius:var(--r12);padding:16px;cursor:pointer;transition:all .3s;text-align:center;position:relative;overflow:hidden}
+.pkg-card:hover{border-color:var(--b2);box-shadow:var(--glow);transform:translateY(-2px)}
+.pkg-card.best{border-color:rgba(0,229,255,0.5);background:var(--cyan3)}
+.pkg-best-tag{position:absolute;top:8px;right:8px;background:var(--cyan);color:var(--bg);font-size:9px;font-weight:800;padding:2px 7px;border-radius:var(--r50);letter-spacing:.5px}
+.pkg-amount{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--cyan);margin-bottom:2px}
+.pkg-label{font-size:11px;color:var(--t3);margin-bottom:8px}
+.pkg-price{font-size:15px;font-weight:700;color:var(--t1)}
+.pkg-save{font-size:10px;color:var(--green);font-weight:600;margin-top:2px}
+.premium-card{background:linear-gradient(135deg,rgba(0,229,255,0.1) 0%,rgba(213,0,249,0.1) 100%);border:1px solid rgba(0,229,255,0.3);border-radius:var(--r16);padding:20px;margin-bottom:16px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:all .3s}
+.premium-card:hover{border-color:var(--b2);box-shadow:var(--glow)}
+.prem-ico{font-size:36px}
+.prem-info h3{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:4px}
+.prem-info p{font-size:13px;color:var(--t3);line-height:1.5}
+.prem-price{margin-left:auto;text-align:right}
+.prem-price h4{font-size:20px;font-weight:800;color:var(--cyan)}
+.prem-price span{font-size:11px;color:var(--t3)}
+.contact-info{background:var(--glass);backdrop-filter:var(--blur);border:1px solid var(--b1);border-radius:var(--r12);padding:16px;display:flex;align-items:center;gap:12px}
+.contact-icon{width:44px;height:44px;background:#25D366;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.contact-info-text h4{font-size:14px;font-weight:600;margin-bottom:2px}
+.contact-info-text p{font-size:12px;color:var(--t3)}
+/* PROFILE */
+#tc-profile{overflow-y:auto;padding:16px}
+.profile-header{background:var(--glass);backdrop-filter:var(--blur);border:1px solid var(--b1);border-radius:var(--r16);padding:20px;margin-bottom:16px;display:flex;align-items:center;gap:16px}
+.profile-avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--cyan2));display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;border:2px solid var(--b2)}
+.profile-info h2{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:4px}
+.profile-info p{font-size:13px;color:var(--t3)}
+.profile-badge{display:inline-flex;align-items:center;gap:4px;margin-top:6px;padding:3px 10px;border-radius:var(--r50);font-size:11px;font-weight:600;background:rgba(0,230,118,0.15);color:var(--green);border:1px solid rgba(0,230,118,0.3)}
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
+.stat-card{background:var(--glass);backdrop-filter:var(--blur);border:1px solid var(--b1);border-radius:var(--r12);padding:16px;text-align:center}
+.stat-card .val{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--cyan)}
+.stat-card .lbl{font-size:12px;color:var(--t3);margin-top:4px}
+.promo-card{background:var(--glass);backdrop-filter:var(--blur);border:1px solid var(--b1);border-radius:var(--r12);padding:16px;margin-bottom:16px}
+.promo-card h3{font-size:15px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.promo-code-display{background:var(--bg4);border:1px dashed var(--b2);border-radius:var(--r8);padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+.promo-code-display span{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--cyan);letter-spacing:2px}
+.copy-btn{padding:6px 14px;background:var(--cyan3);border:1px solid var(--b2);border-radius:var(--r8);color:var(--cyan);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s}
+.copy-btn:hover{background:var(--b2)}
+.menu-item{background:var(--glass);backdrop-filter:var(--blur);border:1px solid var(--b1);border-radius:var(--r12);padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:8px;cursor:pointer;transition:all .2s}
+.menu-item:hover{border-color:var(--b2);background:var(--cyan4)}
+.menu-ico{width:38px;height:38px;border-radius:var(--r8);background:var(--cyan3);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.menu-label{flex:1;font-size:14px;font-weight:500}
+.menu-arrow{color:var(--t4);font-size:18px}
+/* FLOATING WIDGET */
+#floating-widget{position:fixed;inset:0;z-index:999;display:none;flex-direction:column}
+#floating-widget.active{display:flex}
+.fw-backdrop{position:absolute;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:var(--blur)}
+.fw-panel{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(180deg,var(--bg3) 0%,var(--bg) 100%);border-top:1px solid var(--b1);border-radius:24px 24px 0 0;padding:20px 20px 32px;z-index:1;animation:slideUp .4s cubic-bezier(0.34,1.56,0.64,1)}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.fw-handle{width:40px;height:4px;background:var(--b1);border-radius:2px;margin:0 auto 20px;cursor:pointer}
+.fw-video-info{display:flex;align-items:center;gap:12px;margin-bottom:20px;background:var(--glass);border:1px solid var(--b1);border-radius:var(--r12);padding:12px}
+.fw-thumb{width:52px;height:52px;border-radius:var(--r8);overflow:hidden;flex-shrink:0;font-size:28px;background:var(--bg4);display:flex;align-items:center;justify-content:center}
+.fw-vid-meta h4{font-size:14px;font-weight:600;margin-bottom:3px}
+.fw-vid-meta p{font-size:12px;color:var(--t3)}
+.fw-vid-platform{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.fw-open-btn{padding:6px 12px;background:var(--cyan);color:var(--bg);border-radius:var(--r8);font-size:11px;font-weight:700;cursor:pointer;border:none;transition:all .2s;white-space:nowrap}
+.fw-open-btn:hover{background:var(--cyan2)}
+/* TIMER */
+.fw-timer{margin-bottom:16px}
+.fw-timer-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.fw-timer-label{font-size:12px;color:var(--t3);font-weight:600}
+.fw-timer-count{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--cyan)}
+.fw-timer-pts{font-size:13px;color:var(--green);font-weight:600}
+.fw-prog{height:8px;background:var(--bg4);border-radius:4px;overflow:hidden}
+.fw-prog-fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--cyan2));border-radius:4px;transition:width .5s linear;box-shadow:0 0 10px var(--cyanGlow)}
+/* INTERACTIONS */
+.fw-interactions{margin-bottom:16px}
+.fw-int-title{font-size:12px;color:var(--t3);font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+.fw-int-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.fw-int-btn{background:var(--glass);border:1px solid var(--b1);border-radius:var(--r8);padding:10px 4px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;transition:all .2s;font-size:10px;font-weight:600;color:var(--t3)}
+.fw-int-btn .ico{font-size:20px}
+.fw-int-btn.done{background:rgba(0,230,118,0.1);border-color:rgba(0,230,118,0.4);color:var(--green)}
+.fw-int-btn.done .ico::after{content:'✓';font-size:10px;position:relative;top:-12px;left:10px;color:var(--green)}
+/* FW ACTIONS */
+.fw-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.fw-act-btn{padding:12px 8px;border-radius:var(--r8);border:1px solid var(--b1);background:var(--glass);color:var(--t2);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:4px;backdrop-filter:var(--blur2)}
+.fw-act-btn .ico{font-size:20px}
+.fw-act-btn:hover{border-color:var(--b2);background:var(--cyan3);color:var(--cyan)}
+.fw-act-btn.next{background:var(--cyan3);border-color:var(--b2);color:var(--cyan)}
+.fw-act-btn.next:hover{background:var(--b2)}
+/* BOOST FORM */
+#boost-form-overlay{position:fixed;inset:0;z-index:990;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,0.7);backdrop-filter:var(--blur)}
+#boost-form-overlay.active{display:flex}
+.boost-form-panel{width:100%;max-width:480px;background:var(--bg2);border-top:1px solid var(--b1);border-radius:24px 24px 0 0;padding:24px 24px 40px;animation:slideUp .4s cubic-bezier(0.34,1.56,0.64,1)}
+.boost-form-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:4px}
+.boost-form-sub{font-size:13px;color:var(--t3);margin-bottom:20px}
+.price-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:20px}
+.price-opt{background:var(--glass);border:1px solid var(--b1);border-radius:var(--r12);padding:14px;cursor:pointer;transition:all .2s;text-align:center}
+.price-opt:hover{border-color:var(--b2)}
+.price-opt.selected{border-color:var(--cyan);background:var(--cyan3)}
+.price-opt .qty{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--t1)}
+.price-opt .cost{font-size:12px;color:var(--cyan);font-weight:600;margin-top:2px}
+/* INPUT URL */
+.input-group{margin-bottom:16px}
+.input-label{font-size:12px;font-weight:600;color:var(--t3);margin-bottom:6px;display:block;text-transform:uppercase;letter-spacing:.5px}
+.nv-input{width:100%;background:rgba(17,31,53,0.8);border:1px solid var(--b1);border-radius:var(--r8);padding:12px 16px;color:var(--t1);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;transition:all .2s}
+.nv-input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px var(--cyan3)}
+.nv-input::placeholder{color:var(--t4)}
+/* NOTIFICATIONS */
+.toast-wrap{position:fixed;top:80px;right:16px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:var(--glass);backdrop-filter:var(--blur);border:1px solid var(--b1);border-radius:var(--r12);padding:12px 16px;min-width:240px;max-width:300px;pointer-events:auto;animation:toastIn .4s cubic-bezier(0.34,1.56,0.64,1);display:flex;align-items:center;gap:10px;box-shadow:var(--shadow)}
+@keyframes toastIn{from{opacity:0;transform:translateX(60px)}to{opacity:1;transform:translateX(0)}}
+.toast.out{animation:toastOut .3s ease-in forwards}
+@keyframes toastOut{to{opacity:0;transform:translateX(60px)}}
+.toast.success{border-color:rgba(0,230,118,.4)}
+.toast.error{border-color:rgba(255,23,68,.4)}
+.toast.info{border-color:var(--b2)}
+.toast-ico{font-size:20px;flex-shrink:0}
+.toast-msg{font-size:13px;font-weight:500;line-height:1.4}
+/* BUTTONS */
+.btn{padding:14px 24px;border-radius:var(--r12);font-size:15px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .3s;border:none;display:flex;align-items:center;justify-content:center;gap:8px;width:100%}
+.btn-cyan{background:var(--cyan);color:var(--bg)}
+.btn-cyan:hover{background:var(--cyan2);box-shadow:var(--glow)}
+.btn-outline{background:transparent;border:1.5px solid var(--b2);color:var(--cyan)}
+.btn-outline:hover{background:var(--cyan3)}
+.btn-ghost{background:var(--glass);border:1px solid var(--b1);color:var(--t2)}
+.btn-ghost:hover{border-color:var(--b2);color:var(--cyan)}
+.btn-google{background:#ffffff;color:#3c4043;gap:10px;font-size:15px;font-weight:600;border-radius:var(--r12);padding:14px 24px;border:none;cursor:pointer;transition:all .3s;width:100%;display:flex;align-items:center;justify-content:center}
+.btn-google:hover{box-shadow:0 4px 20px rgba(0,0,0,0.3);transform:translateY(-1px)}
+.btn-google img{width:20px;height:20px}
+/* FORM ELEMENTS */
+.toggle-group{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.toggle-opt{border:1.5px solid var(--b1);border-radius:var(--r12);padding:16px;cursor:pointer;transition:all .3s;text-align:center;background:var(--glass2)}
+.toggle-opt:hover{border-color:var(--b2)}
+.toggle-opt.selected{border-color:var(--cyan);background:var(--cyan3)}
+.toggle-opt .ico{font-size:28px;margin-bottom:6px}
+.toggle-opt h4{font-size:14px;font-weight:600;margin-bottom:2px}
+.toggle-opt p{font-size:11px;color:var(--t3)}
+.upload-zone{border:2px dashed var(--b1);border-radius:var(--r12);padding:32px;text-align:center;cursor:pointer;transition:all .3s;background:var(--glass2)}
+.upload-zone:hover{border-color:var(--b2);background:var(--cyan3)}
+.upload-zone .ico{font-size:40px;margin-bottom:12px}
+.upload-zone h4{font-size:15px;font-weight:600;margin-bottom:4px}
+.upload-zone p{font-size:12px;color:var(--t3)}
+/* PENDING */
+.pending-ico{font-size:72px;margin-bottom:24px;animation:pendingPulse 2s ease-in-out infinite}
+@keyframes pendingPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+/* ADMIN */
+#s-admin{background:var(--bg);flex-direction:column;overflow:hidden}
+.admin-topbar{height:56px;background:rgba(8,15,28,0.95);backdrop-filter:var(--blur);border-bottom:1px solid var(--b1);display:flex;align-items:center;padding:0 20px;gap:16px}
+.admin-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--cyan)}
+.admin-back{padding:6px 14px;border-radius:var(--r8);background:var(--glass);border:1px solid var(--b1);color:var(--t2);font-size:13px;font-weight:600;cursor:pointer}
+.admin-content{flex:1;overflow-y:auto;padding:16px}
+.admin-tabs{display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px}
+.a-tab{padding:8px 16px;border-radius:var(--r50);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;border:1px solid var(--b1);background:transparent;color:var(--t3);white-space:nowrap;flex-shrink:0}
+.a-tab.active{background:var(--cyan3);border-color:var(--b2);color:var(--cyan)}
+.admin-section{display:none}
+.admin-section.active{display:block}
+.verif-card{background:var(--glass);backdrop-filter:var(--blur);border:1px solid var(--b1);border-radius:var(--r12);padding:16px;margin-bottom:12px}
+.verif-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.verif-user{display:flex;align-items:center;gap:10px}
+.verif-avatar{width:36px;height:36px;border-radius:50%;background:var(--cyan3);display:flex;align-items:center;justify-content:center;font-size:16px}
+.verif-info h4{font-size:14px;font-weight:600;margin-bottom:2px}
+.verif-info p{font-size:12px;color:var(--t3)}
+.verif-time{font-size:11px;color:var(--t4)}
+.verif-screenshot{width:100%;height:120px;object-fit:cover;border-radius:var(--r8);background:var(--bg4);margin-bottom:12px;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--t4);overflow:hidden}
+.verif-actions{display:flex;gap:8px}
+.v-btn{flex:1;padding:10px;border-radius:var(--r8);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .2s}
+.v-btn.approve{background:rgba(0,230,118,0.2);color:var(--green);border:1px solid rgba(0,230,118,0.4)}
+.v-btn.approve:hover{background:rgba(0,230,118,0.3)}
+.v-btn.reject{background:rgba(255,23,68,0.15);color:var(--red);border:1px solid rgba(255,23,68,0.3)}
+.v-btn.reject:hover{background:rgba(255,23,68,0.25)}
+.recharge-card{background:var(--glass);backdrop-filter:var(--blur);border:1px solid var(--b1);border-radius:var(--r12);padding:16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.rc-info h4{font-size:14px;font-weight:600;margin-bottom:2px}
+.rc-info p{font-size:12px;color:var(--t3)}
+.rc-right{text-align:right}
+.rc-amount{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--cyan)}
+.rc-price{font-size:12px;color:var(--t3)}
+.rc-actions{display:flex;gap:6px;margin-top:8px;justify-content:flex-end}
+.r-btn{padding:6px 14px;border-radius:var(--r8);font-size:12px;font-weight:600;cursor:pointer;border:none}
+.r-btn.ok{background:rgba(0,230,118,0.2);color:var(--green);border:1px solid rgba(0,230,118,0.3)}
+.r-btn.ko{background:rgba(255,23,68,0.15);color:var(--red);border:1px solid rgba(255,23,68,0.3)}
+.admin-stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px}
+.admin-stat{background:var(--glass);backdrop-filter:var(--blur);border:1px solid var(--b1);border-radius:var(--r12);padding:16px}
+.admin-stat .v{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--cyan)}
+.admin-stat .l{font-size:12px;color:var(--t3);margin-top:4px}
+/* DIVIDER */
+.divider{height:1px;background:var(--b1);margin:16px 0}
+/* SECTION TITLES */
+.section-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:48px 24px;color:var(--t3)}
+.empty-ico{font-size:48px;margin-bottom:12px}
+.empty-msg{font-size:14px;line-height:1.6}
+/* INTRO ANIM */
+.logo-anim{animation:logoPulse 3s ease-in-out infinite}
+@keyframes logoPulse{0%,100%{text-shadow:0 0 20px rgba(0,229,255,0.25)}50%{text-shadow:0 0 40px rgba(0,229,255,0.5),0 0 80px rgba(0,229,255,0.2)}}
+/* MISC */
+.text-cyan{color:var(--cyan)}
+.text-green{color:var(--green)}
+.text-red{color:var(--red)}
+.text-muted{color:var(--t3)}
+.fw600{font-weight:600}
+.mt8{margin-top:8px}
+.mt16{margin-top:16px}
+.mb8{margin-bottom:8px}
+.mb16{margin-bottom:16px}
+.gap8{gap:8px}
+.flex{display:flex}
+.ai-center{align-items:center}
+.jc-between{justify-content:space-between}
+.w100{width:100%}
+/* BOOST ORDER BUTTON */
+.boost-order-btn{background:var(--cyan3);border:1px solid var(--b1);border-radius:var(--r8);padding:12px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:all .2s;margin-bottom:8px}
+.boost-order-btn:hover{border-color:var(--b2);background:var(--cyan4)}
+.boost-type-ico{font-size:20px;width:36px;height:36px;background:var(--glass);border-radius:var(--r8);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.boost-type-info{flex:1}
+.boost-type-info h4{font-size:13px;font-weight:600;margin-bottom:1px}
+.boost-type-info p{font-size:11px;color:var(--t3)}
+.boost-type-pts{font-size:13px;font-weight:700;color:var(--cyan)}
+/* TIKTOK/YT PRICING TABLE */
+.pricing-platform{margin-bottom:16px}
+.pricing-platform-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.plat-badge{padding:4px 12px;border-radius:var(--r50);font-size:11px;font-weight:700}
+.plat-badge.tiktok{background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.2);color:#ffffff}
+.plat-badge.yt{background:rgba(255,0,0,0.2);border:1px solid rgba(255,0,0,0.4);color:#ff4444}
+.price-table{background:var(--glass);border:1px solid var(--b1);border-radius:var(--r12);overflow:hidden}
+.price-row{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid rgba(74,158,255,0.08)}
+.price-row:last-child{border-bottom:none}
+.price-row .qty{font-size:13px;font-weight:500}
+.price-row .pts{font-size:13px;font-weight:700;color:var(--cyan)}
+</style>
+</head>
+<body>
+<!-- BG -->
+<div class="bg-layer"><div class="bg-orb"></div><div class="bg-orb"></div><div class="bg-orb"></div></div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- =================== SCREEN: PERMISSIONS =================== -->
+<div class="screen active" id="s-perm">
+  <div class="perm-logo">
+    <div class="app-name logo-anim">NetViral</div>
+    <div class="app-sub">Boost & Earn</div>
+  </div>
+  <div class="perm-title">Avant de continuer</div>
+  <div class="perm-desc">NetViral a besoin de quelques autorisations pour fonctionner correctement.</div>
+  <div class="perm-list" id="permList">
+    <div class="perm-item" id="perm-notif" onclick="grantPerm('notif')">
+      <div class="perm-icon">🔔</div>
+      <div class="perm-info"><h4>Notifications</h4><p>Reçois tes points, boosts et mises à jour en temps réel</p></div>
+      <div class="perm-check pending" id="check-notif">○</div>
+    </div>
+    <div class="perm-item" id="perm-storage" onclick="grantPerm('storage')">
+      <div class="perm-icon">📁</div>
+      <div class="perm-info"><h4>Stockage</h4><p>Sauvegarder tes données et points hors-ligne</p></div>
+      <div class="perm-check pending" id="check-storage">○</div>
+    </div>
+    <div class="perm-item" id="perm-location" onclick="grantPerm('location')">
+      <div class="perm-icon">📍</div>
+      <div class="perm-info"><h4>Localisation</h4><p>Adapter les tarifs à ta région</p></div>
+      <div class="perm-check pending" id="check-location">○</div>
+    </div>
+    <div class="perm-item" id="perm-bg" onclick="grantPerm('bg')">
+      <div class="perm-icon">⚡</div>
+      <div class="perm-info"><h4>Arrière-plan</h4><p>Tracker les vidéos et gagner des points même en background</p></div>
+      <div class="perm-check pending" id="check-bg">○</div>
+    </div>
+  </div>
+  <div style="width:100%;max-width:400px">
+    <button class="btn btn-cyan" onclick="grantAllPerms()">✅ Autoriser tout</button>
+    <div style="margin-top:12px;text-align:center;font-size:12px;color:var(--t4)">Tes données restent privées et sécurisées.</div>
+  </div>
+</div>
+
+<!-- =================== SCREEN: LOGIN =================== -->
+<div class="screen" id="s-login">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="app-name logo-anim">NetViral</div>
+      <div class="tagline">Scroll. Engage. Boost. 🚀</div>
+    </div>
+    <div class="login-title">Connexion</div>
+    <div class="login-sub">Connecte-toi avec Google pour accéder à ton compte NetViral.</div>
+    <button class="btn-google" onclick="googleLogin()">
+      <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      Continuer avec Google
+    </button>
+    <div style="margin-top:20px;text-align:center;font-size:12px;color:var(--t4);line-height:1.6">En continuant, tu acceptes nos <span style="color:var(--cyan);cursor:pointer">CGU</span> et notre <span style="color:var(--cyan);cursor:pointer">Politique de confidentialité</span>.</div>
+  </div>
+</div>
+
+<!-- =================== SCREEN: SETUP =================== -->
+<div class="screen" id="s-setup">
+  <div style="overflow-y:auto;flex:1">
+  <div class="setup-wrap">
+    <div class="setup-step">Étape 1 / 3 — Plateformes</div>
+    <div style="font-family:'Syne',sans-serif;font-size:26px;font-weight:700;margin-bottom:8px">Sur quelles plateformes es-tu ?</div>
+    <div style="font-size:14px;color:var(--t3);margin-bottom:24px;line-height:1.6">Sélectionne les plateformes sur lesquelles tu veux recevoir des boosts.</div>
+    <div class="toggle-group">
+      <div class="toggle-opt" id="opt-tiktok" onclick="togglePlatform('tiktok')">
+        <div class="ico">🎵</div><h4>TikTok</h4><p>Vues, likes, followers, comments, shares</p>
+      </div>
+      <div class="toggle-opt" id="opt-youtube" onclick="togglePlatform('youtube')">
+        <div class="ico">▶️</div><h4>YouTube</h4><p>Vues, likes, abonnés, comments</p>
+      </div>
+    </div>
+    <!-- TikTok username -->
+    <div id="tt-username-group" style="display:none;margin-bottom:16px">
+      <label class="input-label">Ton nom d'utilisateur TikTok</label>
+      <input class="nv-input" id="tt-username" type="text" placeholder="@kiddo_creator" oninput="validateUsername('tiktok')">
+      <div id="tt-err" style="font-size:12px;color:var(--red);margin-top:6px;display:none"></div>
+    </div>
+    <!-- YouTube username -->
+    <div id="yt-username-group" style="display:none;margin-bottom:16px">
+      <label class="input-label">Ton nom d'utilisateur YouTube</label>
+      <input class="nv-input" id="yt-username" type="text" placeholder="@kiddo.gamplay" oninput="validateUsername('youtube')">
+      <div id="yt-err" style="font-size:12px;color:var(--red);margin-top:6px;display:none"></div>
+    </div>
+    <!-- Password -->
+    <div id="pw-group" style="display:none;margin-bottom:20px">
+      <div style="background:rgba(255,214,0,0.08);border:1px solid rgba(255,214,0,0.25);border-radius:var(--r8);padding:12px 14px;margin-bottom:12px;font-size:13px;color:var(--yellow);line-height:1.5">⚠️ Ce mot de passe protège l'accès à tes données dans l'application. Minimum 8 caractères.</div>
+      <label class="input-label">Mot de passe (8 caractères min.)</label>
+      <input class="nv-input" id="setup-pw" type="password" placeholder="••••••••" maxlength="20">
+    </div>
+    <div id="promo-group" style="margin-bottom:20px">
+      <label class="input-label">Code promo (optionnel)</label>
+      <input class="nv-input" id="promo-input" type="text" placeholder="Ex: NV-KIDDO" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
+    </div>
+    <button class="btn btn-cyan" onclick="goToStep2()">Continuer →</button>
+  </div>
+  </div>
+</div>
+
+<!-- =================== SCREEN: SCREENSHOT =================== -->
+<div class="screen" id="s-screenshot">
+  <div style="overflow-y:auto;flex:1">
+  <div class="setup-wrap">
+    <div class="setup-step">Étape 2 / 3 — Vérification</div>
+    <div style="font-family:'Syne',sans-serif;font-size:26px;font-weight:700;margin-bottom:8px">Vérifie ton compte</div>
+    <div style="font-size:14px;color:var(--t3);margin-bottom:24px;line-height:1.6">Pour sécuriser ton compte et ceux des autres, nous devons vérifier que le compte t'appartient vraiment. <b style="color:var(--t2)">Prends une capture d'écran de ton profil</b> (on doit voir les options disponibles uniquement pour le propriétaire du compte).</div>
+    <div style="background:var(--glass);border:1px solid var(--b1);border-radius:var(--r12);padding:16px;margin-bottom:20px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--cyan)">📸 Ce que la capture doit montrer :</div>
+      <div style="font-size:13px;color:var(--t2);line-height:1.8">✅ Ton nom d'utilisateur visible<br>✅ Les options "Modifier le profil" ou menu paramètres<br>✅ Compte public (pas de cadenas 🔒)</div>
+    </div>
+    <div id="upload-zone" class="upload-zone" onclick="simulateUpload()">
+      <div class="ico" id="upload-ico">📷</div>
+      <h4 id="upload-title">Choisir une capture d'écran</h4>
+      <p id="upload-sub">PNG ou JPG • Max 10 MB</p>
+    </div>
+    <input type="file" id="screenshot-file" accept="image/*" style="display:none" onchange="handleFileUpload(event)">
+    <div style="margin-top:20px">
+      <button class="btn btn-cyan" id="submit-btn" onclick="submitVerification()" disabled style="opacity:0.5">Soumettre pour vérification</button>
+    </div>
+    <div style="margin-top:12px;text-align:center;font-size:12px;color:var(--t4);line-height:1.6">🔒 Ta capture sera supprimée après vérification (max 5 jours).<br>Traitement : <b style="color:var(--t3)">3 jours max.</b></div>
+  </div>
+  </div>
+</div>
+
+<!-- =================== SCREEN: PENDING =================== -->
+<div class="screen" id="s-pending">
+  <div class="pending-ico">⏳</div>
+  <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:700;margin-bottom:8px">En cours de vérification</div>
+  <div style="font-size:15px;color:var(--t3);max-width:320px;line-height:1.7;margin-bottom:32px;text-align:center">Notre équipe vérifie ton compte. Tu recevras un e-mail dans <b style="color:var(--cyan)">3 jours maximum</b>.</div>
+  <div style="background:var(--glass);backdrop-filter:var(--blur);border:1px solid var(--b1);border-radius:var(--r12);padding:20px;width:100%;max-width:380px;margin-bottom:24px">
+    <div style="display:flex;justify-content:space-between;margin-bottom:10px">
+      <span style="font-size:13px;color:var(--t3)">Statut</span>
+      <span class="text-yellow fw600">⏳ En attente</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:10px">
+      <span style="font-size:13px;color:var(--t3)">Email de contact</span>
+      <span style="font-size:13px;font-weight:500">kiddo.protech@gmail.com</span>
+    </div>
+    <div style="display:flex;justify-content:space-between">
+      <span style="font-size:13px;color:var(--t3)">Délai max.</span>
+      <span style="font-size:13px;font-weight:500">3 jours</span>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:380px">
+    <button class="btn btn-ghost" onclick="goToAdmin()">⚙️ Admin (Démo)</button>
+    <button class="btn btn-cyan" onclick="skipToApp()">▶️ Accéder à l'app (Démo)</button>
+  </div>
+</div>
+
+<!-- =================== SCREEN: MAIN APP =================== -->
+<div class="screen" id="s-app">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-logo">NetViral</div>
+    <div class="topbar-right">
+      <div class="pts-chip"><span>💎</span><span id="topbar-pts">2,840</span> Lv-UP</div>
+      <div class="notif-btn" onclick="showNotifications()">🔔</div>
+    </div>
+  </div>
+  <!-- TAB CONTENTS -->
+  <div style="flex:1;overflow:hidden;display:flex;flex-direction:column">
+    <!-- FEED -->
+    <div class="tab-content active" id="tc-feed">
+      <div id="feed-scroll-zone" style="overflow-y:auto;flex:1;padding:16px">
+        <!-- STREAK BAR -->
+        <div class="streak-bar">
+          <div class="streak-left">
+            <div class="streak-ico">🔥</div>
+            <div class="streak-info">
+              <h4>Streak Hebdo</h4>
+              <p>Connecte-toi 7j → Bonus aléatoire</p>
+            </div>
+          </div>
+          <div class="streak-days">
+            <div class="streak-day done">L</div>
+            <div class="streak-day done">M</div>
+            <div class="streak-day done">M</div>
+            <div class="streak-day today">J</div>
+            <div class="streak-day">V</div>
+            <div class="streak-day">S</div>
+            <div class="streak-day">D</div>
+          </div>
+        </div>
+        <!-- FILTER -->
+        <div class="feed-header">
+          <div class="feed-title">📺 Feed</div>
+          <div class="feed-filter">
+            <div class="filt-btn active" onclick="filterFeed('all',this)">Tout</div>
+            <div class="filt-btn" onclick="filterFeed('tiktok',this)">TikTok</div>
+            <div class="filt-btn" onclick="filterFeed('youtube',this)">YouTube</div>
+          </div>
+        </div>
+        <!-- VIDEO CARDS -->
+        <div id="video-feed"></div>
+      </div>
+    </div>
+    <!-- ORDERS -->
+    <div class="tab-content" id="tc-orders">
+      <div style="overflow-y:auto;flex:1;padding:16px">
+        <div class="section-title">📦 Mes Commandes</div>
+        <div id="orders-list">
+          <div class="order-card">
+            <div class="order-header">
+              <div class="order-type">
+                <div class="order-ico">👁️</div>
+                <div class="order-info"><h4>1 000 vues TikTok</h4><p>@kiddo_creator • Vidéo "Review PS5"</p></div>
+              </div>
+              <div class="order-status status-active">● Actif</div>
+            </div>
+            <div class="tracker-wrap">
+              <div class="tracker-top"><span class="tracker-label">Progression</span><span class="tracker-val" id="oc1-val">743 / 1000</span></div>
+              <div class="tracker-bar"><div class="tracker-fill" id="oc1-fill" style="width:74.3%"></div></div>
+            </div>
+          </div>
+          <div class="order-card">
+            <div class="order-header">
+              <div class="order-type">
+                <div class="order-ico">❤️</div>
+                <div class="order-info"><h4>50 likes TikTok</h4><p>@kiddo_creator • Vidéo "FIFA 25"</p></div>
+              </div>
+              <div class="order-status status-active">● Actif</div>
+            </div>
+            <div class="tracker-wrap">
+              <div class="tracker-top"><span class="tracker-label">Progression</span><span class="tracker-val" id="oc2-val">31 / 50</span></div>
+              <div class="tracker-bar"><div class="tracker-fill" id="oc2-fill" style="width:62%"></div></div>
+            </div>
+          </div>
+          <div class="order-card">
+            <div class="order-header">
+              <div class="order-type">
+                <div class="order-ico">👤</div>
+                <div class="order-info"><h4>100 followers TikTok</h4><p>@kiddo_creator</p></div>
+              </div>
+              <div class="order-status status-done">✓ Complété</div>
+            </div>
+            <div class="tracker-wrap">
+              <div class="tracker-top"><span class="tracker-label">Progression</span><span class="tracker-val">100 / 100</span></div>
+              <div class="tracker-bar"><div class="tracker-fill" style="width:100%;background:var(--green)"></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="section-title">🚀 Nouvelle Commande</div>
+        <!-- BOOST TYPES -->
+        <div style="background:var(--glass);border:1px solid var(--b1);border-radius:var(--r12);padding:16px;margin-bottom:12px">
+          <div style="font-size:13px;color:var(--t3);margin-bottom:12px;line-height:1.5">Choisis le type de boost que tu veux commander. Tes <b style="color:var(--cyan)">Lv-UP</b> seront débités.</div>
+          <div class="boost-order-btn" onclick="openBoostForm('views','TikTok')">
+            <div class="boost-type-ico">👁️</div>
+            <div class="boost-type-info"><h4>Vues TikTok</h4><p>À partir de 5 000 Lv-UP</p></div>
+            <div class="boost-type-pts">→</div>
+          </div>
+          <div class="boost-order-btn" onclick="openBoostForm('likes','TikTok')">
+            <div class="boost-type-ico">❤️</div>
+            <div class="boost-type-info"><h4>Likes TikTok</h4><p>À partir de 1 000 Lv-UP</p></div>
+            <div class="boost-type-pts">→</div>
+          </div>
+          <div class="boost-order-btn" onclick="openBoostForm('shares','TikTok')">
+            <div class="boost-type-ico">📤</div>
+            <div class="boost-type-info"><h4>Partages TikTok</h4><p>À partir de 2 000 Lv-UP</p></div>
+            <div class="boost-type-pts">→</div>
+          </div>
+          <div class="boost-order-btn" onclick="openBoostForm('comments','TikTok')">
+            <div class="boost-type-ico">💬</div>
+            <div class="boost-type-info"><h4>Commentaires TikTok</h4><p>À partir de 3 000 Lv-UP</p></div>
+            <div class="boost-type-pts">→</div>
+          </div>
+          <div class="boost-order-btn" onclick="openBoostForm('views','YouTube')">
+            <div class="boost-type-ico">▶️</div>
+            <div class="boost-type-info"><h4>Vues YouTube</h4><p>À partir de 10 000 Lv-UP</p></div>
+            <div class="boost-type-pts">→</div>
+          </div>
+          <div class="boost-order-btn" onclick="openBoostForm('likes','YouTube')">
+            <div class="boost-type-ico">👍</div>
+            <div class="boost-type-info"><h4>Likes YouTube</h4><p>À partir de 2 000 Lv-UP</p></div>
+            <div class="boost-type-pts">→</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- SHOP -->
+    <div class="tab-content" id="tc-shop">
+      <div style="overflow-y:auto;flex:1;padding:16px">
+        <div class="section-title">💎 Acheter des Lv-UP</div>
+        <div class="lv-packages">
+          <div class="pkg-card" onclick="buyPoints(500,1000)">
+            <div class="pkg-amount">500</div>
+            <div class="pkg-label">Lv-UP</div>
+            <div class="pkg-price">1 000 F CFA</div>
+          </div>
+          <div class="pkg-card" onclick="buyPoints(2500,4000)">
+            <div class="pkg-amount">2 500</div>
+            <div class="pkg-label">Lv-UP</div>
+            <div class="pkg-price">4 000 F CFA</div>
+            <div class="pkg-save">↓ 20% économisé</div>
+          </div>
+          <div class="pkg-card best" onclick="buyPoints(7000,10000)">
+            <div class="pkg-best-tag">BEST</div>
+            <div class="pkg-amount">7 000</div>
+            <div class="pkg-label">Lv-UP</div>
+            <div class="pkg-price">10 000 F CFA</div>
+            <div class="pkg-save">↓ 30% économisé</div>
+          </div>
+          <div class="pkg-card" onclick="buyPoints(20000,25000)">
+            <div class="pkg-amount">20K</div>
+            <div class="pkg-label">Lv-UP</div>
+            <div class="pkg-price">25 000 F CFA</div>
+            <div class="pkg-save">↓ 43% économisé</div>
+          </div>
+        </div>
+        <!-- HOW TO BUY -->
+        <div style="background:var(--cyan3);border:1px solid var(--b1);border-radius:var(--r12);padding:14px;margin:16px 0;font-size:13px;color:var(--t2);line-height:1.7">
+          💡 <b style="color:var(--cyan)">Comment acheter ?</b><br>
+          Sélectionne un pack → Contacte le service client WhatsApp → Envoie le dépôt → Reçois tes Lv-UP automatiquement.
+        </div>
+        <div class="contact-info" onclick="openWhatsApp(0)">
+          <div class="contact-icon">💬</div>
+          <div class="contact-info-text"><h4>Service Client WhatsApp</h4><p>+225 07 19 08 29 97 · Réponse rapide</p></div>
+          <div style="margin-left:auto;color:var(--cyan);font-size:20px">→</div>
+        </div>
+        <div class="divider"></div>
+        <div class="section-title">👑 Abonnement Premium</div>
+        <div class="premium-card" onclick="buyPremium()">
+          <div class="prem-ico">👑</div>
+          <div class="prem-info">
+            <h3>NetViral Premium</h3>
+            <p>✅ Zéro publicité<br>✅ Points x1.5<br>✅ Badge Premium</p>
+          </div>
+          <div class="prem-price"><h4>2 000 F</h4><span>/mois</span></div>
+        </div>
+        <div class="divider"></div>
+        <div class="section-title">📊 Tarifs Boosts</div>
+        <div class="pricing-platform">
+          <div class="pricing-platform-header"><div class="plat-badge tiktok">🎵 TikTok</div></div>
+          <div class="price-table">
+            <div class="price-row"><span class="qty">1 000 vues</span><span class="pts">5 000 Lv-UP</span></div>
+            <div class="price-row"><span class="qty">5 000 vues</span><span class="pts">20 000 Lv-UP</span></div>
+            <div class="price-row"><span class="qty">10 000 vues</span><span class="pts">35 000 Lv-UP</span></div>
+            <div class="price-row"><span class="qty">50 000 vues</span><span class="pts">150 000 Lv-UP</span></div>
+            <div class="price-row"><span class="qty">100 000 vues</span><span class="pts">250 000 Lv-UP</span></div>
+            <div class="price-row"><span class="qty">50 likes</span><span class="pts">1 000 Lv-UP</span></div>
+            <div class="price-row"><span class="qty">200 likes</span><span class="pts">3 500 Lv-UP</span></div>
+            <div class="price-row"><span class="qty">1 000 likes</span><span class="pts">15 000 Lv-UP</span></div>
+            <div class="price-row"><span class="qty">50 partages</span><span class="pts">2 000 Lv-UP</span></div>
+            <div class="price-row"><span class="qty">200 partages</span><span class="pts">7 000 Lv-UP</span></div>
+            <div class="price-row"><span class="qty">50 commentaires</span><span class="pts">3 000 Lv-UP</span></div>
+            <div class="price-row"><span class="qty">200 commentaires</span><span class="pts">10 000 Lv-UP</span></div>
+          </div>
+        </div>
+        <div class="pricing-platform" style="margin-top:16px">
+          <div class="pricing-platform-header"><div class="plat-badge yt">▶️ YouTube</div></div>
+          <div class="price-table">
+            <div class="price-row"><span class="qty">1 000 vues (Short)</span><span class="pts">8 000 Lv-UP</span></div>
+            <div class="price-row"><span class="qty">1 000 vues (Vidéo)</span><span class="pts">10 000 Lv-UP</span></div>
+            <div class="price-row"><span class="qty">10 000 vues (Vidéo)</span><span class="pts">70 000 Lv-UP</span></div>
+            <div class="price-row"><span class="qty">100 000 vues</span><span class="pts">500 000 Lv-UP</span></div>
+            <div class="price-row"><span class="qty">50 likes</span><span class="pts">2 000 Lv-UP</span></div>
+            <div class="price-row"><span class="qty">500 likes</span><span class="pts">15 000 Lv-UP</span></div>
+            <div class="price-row"><span class="qty">100 abonnés</span><span class="pts">8 000 Lv-UP</span></div>
+            <div class="price-row"><span class="qty">1 000 abonnés</span><span class="pts">60 000 Lv-UP</span></div>
+          </div>
+        </div>
+        <div style="height:20px"></div>
+      </div>
+    </div>
+    <!-- PROFILE -->
+    <div class="tab-content" id="tc-profile">
+      <div style="overflow-y:auto;flex:1;padding:16px">
+        <div class="profile-header">
+          <div class="profile-avatar">👤</div>
+          <div class="profile-info">
+            <h2 id="profile-name">Kiddo</h2>
+            <p id="profile-platforms">TikTok · YouTube</p>
+            <div class="profile-badge">✅ Compte vérifié</div>
+          </div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="val" id="stat-pts">2 840</div><div class="lbl">💎 Lv-UP</div></div>
+          <div class="stat-card"><div class="val">4</div><div class="lbl">🔥 Streak</div></div>
+          <div class="stat-card"><div class="val">7</div><div class="lbl">📦 Commandes</div></div>
+          <div class="stat-card"><div class="val">1 243</div><div class="lbl">🎯 Points gagnés</div></div>
+        </div>
+        <div class="promo-card">
+          <h3>🎁 Mon Code Promo</h3>
+          <div style="font-size:13px;color:var(--t3);margin-bottom:12px;line-height:1.6">Partage ton code. Quand quelqu'un le rentre et dépense 10 000+ Lv-UP, tu reçois un bonus ! (max 100 personnes)</div>
+          <div class="promo-code-display">
+            <span id="my-promo-code">NV-KIDDO7</span>
+            <button class="copy-btn" onclick="copyPromo()">📋 Copier</button>
+          </div>
+          <div style="margin-top:10px;font-size:12px;color:var(--t3)">👥 <span id="promo-used">3</span> / 100 personnes ont utilisé ton code</div>
+        </div>
+        <div class="menu-item" onclick="showBonusInfo()">
+          <div class="menu-ico">🎁</div><div class="menu-label">Bonus Hebdomadaire</div><div class="menu-arrow">›</div>
+        </div>
+        <div class="menu-item" onclick="showSubInfo()">
+          <div class="menu-ico">👑</div><div class="menu-label">Mon Abonnement</div><div class="menu-arrow">›</div>
+        </div>
+        <div class="menu-item" onclick="openWhatsApp(1)">
+          <div class="menu-ico">💬</div><div class="menu-label">Support WhatsApp</div><div class="menu-arrow">›</div>
+        </div>
+        <div class="menu-item" onclick="goToAdmin()">
+          <div class="menu-ico">⚙️</div><div class="menu-label">Espace Admin</div><div class="menu-arrow">›</div>
+        </div>
+        <div class="menu-item" onclick="logout()">
+          <div class="menu-ico">🚪</div><div class="menu-label" style="color:var(--red)">Déconnexion</div><div class="menu-arrow">›</div>
+        </div>
+        <div style="height:20px"></div>
+      </div>
+    </div>
+  </div>
+  <!-- BOTTOM TABS -->
+  <div class="tabs">
+    <div class="tab active" id="tab-feed" onclick="switchTab('feed')"><div class="tab-ico">🏠</div><span>Feed</span></div>
+    <div class="tab" id="tab-orders" onclick="switchTab('orders')"><div class="tab-ico">📦</div><span>Commandes</span></div>
+    <div class="tab" id="tab-shop" onclick="switchTab('shop')"><div class="tab-ico">🛒</div><span>Shop</span></div>
+    <div class="tab" id="tab-profile" onclick="switchTab('profile')"><div class="tab-ico">👤</div><span>Profil</span></div>
+  </div>
+</div>
+
+<!-- =================== SCREEN: ADMIN =================== -->
+<div class="screen" id="s-admin">
+  <div class="admin-topbar">
+    <button class="admin-back" onclick="backFromAdmin()">← Retour</button>
+    <div class="admin-title">⚙️ Admin Panel</div>
+  </div>
+  <div class="admin-content">
+    <div class="admin-tabs">
+      <div class="a-tab active" onclick="switchAdminTab('stats',this)">📊 Stats</div>
+      <div class="a-tab" onclick="switchAdminTab('verif',this)">🔍 Vérifications</div>
+      <div class="a-tab" onclick="switchAdminTab('recharges',this)">💎 Recharges</div>
+      <div class="a-tab" onclick="switchAdminTab('users',this)">👥 Utilisateurs</div>
+    </div>
+    <!-- STATS -->
+    <div class="admin-section active" id="admin-stats">
+      <div class="admin-stat-grid">
+        <div class="admin-stat"><div class="v">1 247</div><div class="l">Utilisateurs</div></div>
+        <div class="admin-stat"><div class="v">342</div><div class="l">Actifs aujourd'hui</div></div>
+        <div class="admin-stat"><div class="v">58</div><div class="l">En attente vérif</div></div>
+        <div class="admin-stat"><div class="v">2.4M</div><div class="l">Lv-UP circulants</div></div>
+        <div class="admin-stat"><div class="v">143</div><div class="l">Commandes actives</div></div>
+        <div class="admin-stat"><div class="v">12</div><div class="l">Recharges en attente</div></div>
+      </div>
+    </div>
+    <!-- VERIFICATIONS -->
+    <div class="admin-section" id="admin-verif">
+      <div style="font-size:13px;color:var(--t3);margin-bottom:12px">58 comptes en attente de vérification</div>
+      <div class="verif-card">
+        <div class="verif-header">
+          <div class="verif-user">
+            <div class="verif-avatar">👤</div>
+            <div class="verif-info"><h4>@alpha_creator</h4><p>TikTok • Inscrit il y a 2h</p></div>
+          </div>
+          <div class="verif-time">Il y a 2h</div>
+        </div>
+        <div class="verif-screenshot" style="background:linear-gradient(135deg,var(--bg3),var(--bg4));display:flex;align-items:center;justify-content:center">📱 Capture d'écran du profil TikTok</div>
+        <div style="background:var(--glass);border:1px solid var(--b1);border-radius:var(--r8);padding:10px;margin-bottom:12px;font-size:12px;color:var(--t3)">
+          <div>📋 Username : @alpha_creator</div>
+          <div>🌐 Plateforme : TikTok</div>
+          <div>📍 Pays : Côte d'Ivoire</div>
+        </div>
+        <div class="verif-actions">
+          <button class="v-btn approve" onclick="approveUser('alpha_creator')">✅ Approuver</button>
+          <button class="v-btn reject" onclick="rejectUser('alpha_creator')">❌ Rejeter</button>
+        </div>
+      </div>
+      <div class="verif-card">
+        <div class="verif-header">
+          <div class="verif-user">
+            <div class="verif-avatar">👤</div>
+            <div class="verif-info"><h4>@beta_vlogger</h4><p>YouTube • Inscrit il y a 5h</p></div>
+          </div>
+          <div class="verif-time">Il y a 5h</div>
+        </div>
+        <div class="verif-screenshot" style="background:linear-gradient(135deg,rgba(255,0,0,0.1),var(--bg4));display:flex;align-items:center;justify-content:center">📱 Capture d'écran du profil YouTube</div>
+        <div style="background:var(--glass);border:1px solid var(--b1);border-radius:var(--r8);padding:10px;margin-bottom:12px;font-size:12px;color:var(--t3)">
+          <div>📋 Username : @beta_vlogger</div>
+          <div>🌐 Plateforme : YouTube</div>
+          <div>📍 Pays : Sénégal</div>
+        </div>
+        <div class="verif-actions">
+          <button class="v-btn approve" onclick="approveUser('beta_vlogger')">✅ Approuver</button>
+          <button class="v-btn reject" onclick="rejectUser('beta_vlogger')">❌ Rejeter</button>
+        </div>
+      </div>
+    </div>
+    <!-- RECHARGES -->
+    <div class="admin-section" id="admin-recharges">
+      <div style="font-size:13px;color:var(--t3);margin-bottom:12px">12 recharges en attente de validation</div>
+      <div class="recharge-card">
+        <div class="rc-info"><h4>@kiddo_creator</h4><p>Il y a 30 min · Orange Money</p></div>
+        <div class="rc-right">
+          <div class="rc-amount">2 500 Lv-UP</div>
+          <div class="rc-price">4 000 F CFA</div>
+          <div class="rc-actions">
+            <button class="r-btn ok" onclick="approveRecharge('kiddo_creator',2500)">✅ Valider</button>
+            <button class="r-btn ko" onclick="rejectRecharge('kiddo_creator')">❌</button>
+          </div>
+        </div>
+      </div>
+      <div class="recharge-card">
+        <div class="rc-info"><h4>@viral_user22</h4><p>Il y a 1h · Djamo</p></div>
+        <div class="rc-right">
+          <div class="rc-amount">500 Lv-UP</div>
+          <div class="rc-price">1 000 F CFA</div>
+          <div class="rc-actions">
+            <button class="r-btn ok" onclick="approveRecharge('viral_user22',500)">✅ Valider</button>
+            <button class="r-btn ko" onclick="rejectRecharge('viral_user22')">❌</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- USERS -->
+    <div class="admin-section" id="admin-users">
+      <div style="background:var(--glass);border:1px solid var(--b1);border-radius:var(--r12);overflow:hidden">
+        <div style="padding:12px 14px;border-bottom:1px solid var(--b1);display:grid;grid-template-columns:1fr auto auto;gap:12px;font-size:11px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:.5px">
+          <span>Utilisateur</span><span>Lv-UP</span><span>Statut</span>
+        </div>
+        <div id="admin-users-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =================== FLOATING WIDGET =================== -->
+<div id="floating-widget">
+  <div class="fw-backdrop" onclick="closeWidget()"></div>
+  <div class="fw-panel">
+    <div class="fw-handle" onclick="closeWidget()"></div>
+    <!-- Video Info -->
+    <div class="fw-video-info">
+      <div class="fw-thumb" id="fw-thumb">🎵</div>
+      <div class="fw-vid-meta">
+        <h4 id="fw-title">Chargement...</h4>
+        <p id="fw-creator">@creator</p>
+        <p id="fw-platform-tag" style="font-size:11px;color:var(--cyan);margin-top:2px;font-weight:600"></p>
+      </div>
+      <div class="fw-vid-platform">
+        <button class="fw-open-btn" id="fw-open-btn" onclick="openVideoExternal()">🔗 Ouvrir</button>
+      </div>
+    </div>
+    <!-- Timer -->
+    <div class="fw-timer">
+      <div class="fw-timer-top">
+        <span class="fw-timer-label">⏱️ TEMPS DE VISIONNAGE</span>
+        <div style="display:flex;align-items:center;gap:12px">
+          <span class="fw-timer-pts" id="fw-pts-earn">+0 Lv-UP</span>
+          <span class="fw-timer-count" id="fw-timer">0s</span>
+        </div>
+      </div>
+      <div class="fw-prog"><div class="fw-prog-fill" id="fw-prog-fill" style="width:0%"></div></div>
+    </div>
+    <!-- Interactions -->
+    <div class="fw-interactions">
+      <div class="fw-int-title">Interactions (+bonus Lv-UP)</div>
+      <div class="fw-int-grid">
+        <div class="fw-int-btn" id="int-like" onclick="markInteraction('like')"><div class="ico">❤️</div><span>Liké (+50)</span></div>
+        <div class="fw-int-btn" id="int-follow" onclick="markInteraction('follow')"><div class="ico">👤</div><span>Suivi (+100)</span></div>
+        <div class="fw-int-btn" id="int-share" onclick="markInteraction('share')"><div class="ico">📤</div><span>Partagé (+50)</span></div>
+        <div class="fw-int-btn" id="int-comment" onclick="markInteraction('comment')"><div class="ico">💬</div><span>Commenté (+50)</span></div>
+      </div>
+    </div>
+    <!-- Actions -->
+    <div class="fw-actions">
+      <div class="fw-act-btn" onclick="closeWidget()"><div class="ico">🔙</div><span>Retour</span></div>
+      <div class="fw-act-btn" onclick="collectPoints()"><div class="ico">💎</div><span>Collecter</span></div>
+      <div class="fw-act-btn next" onclick="nextVideo()"><div class="ico">⏭️</div><span>Suivante</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- =================== BOOST FORM OVERLAY =================== -->
+<div id="boost-form-overlay">
+  <div class="boost-form-panel">
+    <div class="fw-handle" onclick="closeBoostForm()" style="cursor:pointer"></div>
+    <div class="boost-form-title" id="bf-title">Commander des vues</div>
+    <div class="boost-form-sub" id="bf-sub">Sélectionne la quantité</div>
+    <div class="price-grid" id="bf-options"></div>
+    <div class="input-group">
+      <label class="input-label">URL de la publication</label>
+      <input class="nv-input" id="bf-url" type="url" placeholder="https://www.tiktok.com/@user/video/...">
+    </div>
+    <button class="btn btn-cyan" onclick="submitBoostOrder()">🚀 Commander</button>
+    <button class="btn btn-ghost" onclick="closeBoostForm()" style="margin-top:8px">Annuler</button>
+  </div>
+</div>
+
+<script>
+// =================== STATE ===================
+let state = {
+  screen: 'perm',
+  perms: { notif:false, storage:false, location:false, bg:false },
+  platforms: [],
+  user: { name:'Kiddo', email:'kiddo@gmail.com', avatar:'👤' },
+  points: 2840,
+  todayPoints: 340,
+  streak: 4,
+  isPremium: false,
+  promoCode: 'NV-KIDDO7',
+  activeTab: 'feed',
+  adminPrev: 'app',
+  currentBoostType: null,
+  currentBoostPlatform: null,
+  widget: {
+    active: false,
+    videoIndex: 0,
+    timer: 0,
+    maxTime: 30,
+    interval: null,
+    interactions: { like:false, follow:false, share:false, comment:false },
+    pendingPoints: 0
+  }
+};
+
+// =================== VIDEO DATA ===================
+const VIDEOS = [
+  { id:1, title:"FIFA 25 - Meilleur but de la semaine", creator:"@pro_gamer_ci", platform:"tiktok", emoji:"🎮", boost:"500 vues", boostType:"views", current:312, total:500, watchTime:30, basePoints:30 },
+  { id:2, title:"Ma routine matinale au Sénégal", creator:"@dakar_lifestyle", platform:"tiktok", emoji:"🌅", boost:"50 likes", boostType:"likes", current:38, total:50, watchTime:20, basePoints:20 },
+  { id:3, title:"Review Samsung Galaxy S25 Ultra - Vaut-il 800€?", creator:"@tech_africa", platform:"youtube", emoji:"📱", boost:"1000 vues", boostType:"views", current:743, total:1000, watchTime:60, basePoints:100 },
+  { id:4, title:"Recette Attiéké Poisson - Côte d'Ivoire", creator:"@cuisine_ivoirienne", platform:"tiktok", emoji:"🍽️", boost:"100 followers", boostType:"followers", current:67, total:100, watchTime:40, basePoints:40 },
+  { id:5, title:"Genshin Impact 4.5 - Mon avis après 2000h", creator:"@genshin_afrique", platform:"youtube", emoji:"⚔️", boost:"200 likes", boostType:"likes", current:156, total:200, watchTime:120, basePoints:200 },
+  { id:6, title:"Dance Challenge #trending", creator:"@afro_dancer", platform:"tiktok", emoji:"💃", boost:"50 partages", boostType:"shares", current:28, total:50, watchTime:15, basePoints:15 },
+];
+
+let filteredVideos = [...VIDEOS];
+let screenshotUploaded = false;
+
+// =================== SCREENS ===================
+function goTo(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('s-' + id).classList.add('active');
+  state.screen = id;
+}
+
+// =================== PERMISSIONS ===================
+function grantPerm(type) {
+  state.perms[type] = true;
+  const item = document.getElementById('perm-' + type);
+  const check = document.getElementById('check-' + type);
+  item.classList.add('granted');
+  check.classList.remove('pending');
+  check.textContent = '✅';
+  if (type === 'notif' && 'Notification' in window) {
+    Notification.requestPermission();
+  }
+  if (type === 'location' && navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(() => {}, () => {});
+  }
+  checkAllPermsGranted();
+}
+
+function grantAllPerms() {
+  ['notif','storage','location','bg'].forEach(p => grantPerm(p));
+  setTimeout(() => goTo('login'), 600);
+}
+
+function checkAllPermsGranted() {
+  const all = Object.values(state.perms).every(v => v);
+  if (all) setTimeout(() => goTo('login'), 600);
+}
+
+// =================== LOGIN ===================
+function googleLogin() {
+  showToast('info', '🔄 Connexion Google...', 2000);
+  setTimeout(() => {
+    state.user = { name: 'Kiddo', email: 'kiddo.protech@gmail.com', avatar: '👤' };
+    const saved = localStorage.getItem('nv_verified');
+    if (saved === 'true') {
+      goTo('app');
+      initApp();
+    } else {
+      goTo('setup');
+    }
+  }, 1500);
+}
+
+// =================== SETUP ===================
+function togglePlatform(p) {
+  const el = document.getElementById('opt-' + p);
+  const idx = state.platforms.indexOf(p);
+  if (idx === -1) {
+    state.platforms.push(p);
+    el.classList.add('selected');
+  } else {
+    state.platforms.splice(idx, 1);
+    el.classList.remove('selected');
+  }
+  document.getElementById('tt-username-group').style.display = state.platforms.includes('tiktok') ? 'block' : 'none';
+  document.getElementById('yt-username-group').style.display = state.platforms.includes('youtube') ? 'block' : 'none';
+  document.getElementById('pw-group').style.display = state.platforms.length > 0 ? 'block' : 'none';
+}
+
+function validateUsername(plat) {
+  const val = document.getElementById(plat === 'tiktok' ? 'tt-username' : 'yt-username').value;
+  const errEl = document.getElementById(plat === 'tiktok' ? 'tt-err' : 'yt-err');
+  if (val && !val.startsWith('@')) {
+    errEl.textContent = '⚠️ Le nom doit commencer par @';
+    errEl.style.display = 'block';
+  } else {
+    errEl.style.display = 'none';
+  }
+}
+
+function goToStep2() {
+  if (state.platforms.length === 0) { showToast('error','⚠️ Sélectionne au moins une plateforme'); return; }
+  const pw = document.getElementById('setup-pw').value;
+  if (pw.length < 8) { showToast('error','⚠️ Mot de passe trop court (min 8 caractères)'); return; }
+  if (state.platforms.includes('tiktok')) {
+    const tt = document.getElementById('tt-username').value;
+    if (!tt.startsWith('@')) { showToast('error','⚠️ Nom TikTok invalide'); return; }
+  }
+  if (state.platforms.includes('youtube')) {
+    const yt = document.getElementById('yt-username').value;
+    if (!yt.startsWith('@')) { showToast('error','⚠️ Nom YouTube invalide'); return; }
+  }
+  goTo('screenshot');
+}
+
+// =================== SCREENSHOT ===================
+function simulateUpload() {
+  document.getElementById('screenshot-file').click();
+}
+
+function handleFileUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  screenshotUploaded = true;
+  document.getElementById('upload-ico').textContent = '✅';
+  document.getElementById('upload-title').textContent = file.name;
+  document.getElementById('upload-sub').textContent = (file.size / 1024).toFixed(0) + ' KB · Prêt à soumettre';
+  document.getElementById('upload-zone').style.borderColor = 'rgba(0,230,118,0.5)';
+  document.getElementById('upload-zone').style.background = 'rgba(0,230,118,0.05)';
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = false;
+  btn.style.opacity = '1';
+}
+
+function submitVerification() {
+  if (!screenshotUploaded) { showToast('error','⚠️ Uploade une capture d\'écran'); return; }
+  showToast('success','📤 Soumis ! Vérification en cours...');
+  setTimeout(() => goTo('pending'), 1000);
+}
+
+function skipToApp() {
+  localStorage.setItem('nv_verified', 'true');
+  goTo('app');
+  initApp();
+}
+
+function goToAdmin() {
+  state.adminPrev = state.screen;
+  goTo('admin');
+  renderAdminUsers();
+}
+
+function backFromAdmin() {
+  goTo(state.adminPrev === 'admin' ? 'app' : state.adminPrev);
+}
+
+// =================== APP INIT ===================
+function initApp() {
+  renderFeed(filteredVideos);
+  updateTopbarPoints();
+  document.getElementById('profile-name').textContent = state.user.name;
+  liveOrdersUpdate();
+}
+
+function updateTopbarPoints() {
+  document.getElementById('topbar-pts').textContent = state.points.toLocaleString('fr-FR');
+  document.getElementById('stat-pts').textContent = state.points.toLocaleString('fr-FR');
+}
+
+// =================== FEED ===================
+function renderFeed(vids) {
+  const container = document.getElementById('video-feed');
+  container.innerHTML = '';
+  if (vids.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-ico">📭</div><div class="empty-msg">Aucune vidéo pour ce filtre.</div></div>';
+    return;
+  }
+  vids.forEach((v, i) => {
+    const pct = (v.current / v.total * 100).toFixed(1);
+    const div = document.createElement('div');
+    div.className = 'vcard';
+    div.style.animationDelay = (i * 0.05) + 's';
+    div.innerHTML = `
+      <div class="vcard-thumb">
+        <div class="vcard-thumb-bg">${v.emoji}</div>
+        <div class="vcard-overlay"></div>
+        <div class="vcard-platform ${v.platform}">${v.platform === 'tiktok' ? '🎵 TikTok' : '▶️ YouTube'}</div>
+        <div class="vcard-boost-badge">📈 BOOST</div>
+        <div class="vcard-pts-preview">+${v.basePoints} Lv-UP</div>
+      </div>
+      <div class="vcard-body">
+        <div class="vcard-meta">
+          <div class="vcard-avatar">${v.emoji}</div>
+          <div class="vcard-user">${v.creator}</div>
+          <div class="vcard-time">il y a ${Math.floor(Math.random()*60)+1}min</div>
+        </div>
+        <div class="vcard-title">${v.title}</div>
+        <div class="tracker-wrap">
+          <div class="tracker-top">
+            <span class="tracker-label">${v.boost}</span>
+            <span class="tracker-val" id="tk-val-${v.id}">${v.current} / ${v.total}</span>
+          </div>
+          <div class="tracker-bar"><div class="tracker-fill" id="tk-fill-${v.id}" style="width:${pct}%"></div></div>
+        </div>
+        <div class="vcard-actions">
+          <button class="act-btn primary" onclick="openWidget(${v.id})">▶️ Regarder (+${v.basePoints} Lv-UP)</button>
+        </div>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function filterFeed(type, btn) {
+  document.querySelectorAll('.filt-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  filteredVideos = type === 'all' ? [...VIDEOS] : VIDEOS.filter(v => v.platform === type);
+  renderFeed(filteredVideos);
+}
+
+// =================== TABS ===================
+function switchTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tc-' + tab).classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+  state.activeTab = tab;
+}
+
+// =================== FLOATING WIDGET ===================
+function openWidget(videoId) {
+  const video = VIDEOS.find(v => v.id === videoId);
+  if (!video) return;
+  const w = state.widget;
+  w.active = true;
+  w.videoId = videoId;
+  w.timer = 0;
+  w.maxTime = video.watchTime;
+  w.pendingPoints = 0;
+  w.interactions = { like:false, follow:false, share:false, comment:false };
+
+  document.getElementById('fw-title').textContent = video.title;
+  document.getElementById('fw-creator').textContent = video.creator;
+  document.getElementById('fw-platform-tag').textContent = video.platform === 'tiktok' ? '🎵 TikTok' : '▶️ YouTube';
+  document.getElementById('fw-thumb').textContent = video.emoji;
+  document.getElementById('fw-open-btn').textContent = '🔗 Ouvrir ' + (video.platform === 'tiktok' ? 'TikTok' : 'YouTube');
+
+  // Reset interactions
+  ['like','follow','share','comment'].forEach(i => {
+    const el = document.getElementById('int-' + i);
+    el.classList.remove('done');
+  });
+
+  document.getElementById('fw-timer').textContent = '0s';
+  document.getElementById('fw-pts-earn').textContent = '+0 Lv-UP';
+  document.getElementById('fw-prog-fill').style.width = '0%';
+  document.getElementById('floating-widget').classList.add('active');
+
+  if (w.interval) clearInterval(w.interval);
+  w.interval = setInterval(() => tickWidget(video), 1000);
+}
+
+function tickWidget(video) {
+  const w = state.widget;
+  w.timer++;
+  const pct = Math.min((w.timer / w.maxTime) * 100, 100);
+  document.getElementById('fw-prog-fill').style.width = pct + '%';
+  document.getElementById('fw-timer').textContent = w.timer + 's';
+
+  // Calculate points based on time
+  let pts = 0;
+  if (w.timer >= 60 * 10) pts = 10000;
+  else if (w.timer >= 60 * 3) pts = 300;
+  else if (w.timer >= 60 * 2) pts = 200;
+  else if (w.timer >= 60) pts = 100;
+  else if (w.timer >= 50) pts = 50;
+  else if (w.timer >= 40) pts = 40;
+  else if (w.timer >= 30) pts = 30;
+  else if (w.timer >= 20) pts = 20;
+  else if (w.timer >= 10) pts = 10;
+  else if (w.timer >= 5) pts = 5;
+  else pts = 1;
+
+  // Add interaction bonuses
+  if (w.interactions.like) pts += 50;
+  if (w.interactions.follow) pts += 100;
+  if (w.interactions.share) pts += 50;
+  if (w.interactions.comment) pts += 50;
+
+  w.pendingPoints = pts;
+  document.getElementById('fw-pts-earn').textContent = '+' + pts + ' Lv-UP';
+
+  // Auto-complete + bonus
+  if (w.timer >= w.maxTime) {
+    clearInterval(w.interval);
+    pts += 100; // completion bonus
+    w.pendingPoints = pts;
+    document.getElementById('fw-pts-earn').textContent = '+' + pts + ' Lv-UP (🎉 +100 bonus!)';
+    document.getElementById('fw-prog-fill').style.background = 'linear-gradient(90deg,var(--green),#00ff88)';
+    showToast('success', '🎉 Vidéo complète ! +100 points bonus');
+    // Auto next after 3s
+    setTimeout(() => nextVideo(), 3000);
+  }
+}
+
+function markInteraction(type) {
+  const w = state.widget;
+  if (w.interactions[type]) return; // already marked
+  w.interactions[type] = true;
+  const el = document.getElementById('int-' + type);
+  el.classList.add('done');
+  const bonuses = { like:50, follow:100, share:50, comment:50 };
+  const bonus = bonuses[type];
+  showToast('success', `+${bonus} Lv-UP · ${type === 'like' ? '❤️ Like' : type === 'follow' ? '👤 Follow' : type === 'share' ? '📤 Share' : '💬 Comment'} compté !`);
+}
+
+function openVideoExternal() {
+  const video = VIDEOS.find(v => v.id === state.widget.videoId);
+  if (!video) return;
+  const urls = {
+    tiktok: 'https://www.tiktok.com/' + video.creator,
+    youtube: 'https://www.youtube.com/' + video.creator
+  };
+  window.open(urls[video.platform], '_blank');
+  showToast('info', '🔗 ' + (video.platform === 'tiktok' ? 'TikTok' : 'YouTube') + ' ouvert dans un nouvel onglet');
+}
+
+function collectPoints() {
+  const w = state.widget;
+  if (w.pendingPoints <= 0) { showToast('info', '⏱️ Regarde d\'abord la vidéo un peu !'); return; }
+  addPoints(w.pendingPoints);
+  showToast('success', `💎 +${w.pendingPoints} Lv-UP collectés !`);
+  w.pendingPoints = 0;
+  w.timer = 0;
+  if (w.interval) clearInterval(w.interval);
+  closeWidget();
+  // Update order tracker live
+  updateOrderLive(w.videoId);
+}
+
+function nextVideo() {
+  const w = state.widget;
+  // Auto-collect
+  if (w.pendingPoints > 0) addPoints(w.pendingPoints);
+  if (w.interval) clearInterval(w.interval);
+  // Move to next video in filtered list
+  const currentIdx = filteredVideos.findIndex(v => v.id === w.videoId);
+  const nextIdx = (currentIdx + 1) % filteredVideos.length;
+  const nextVideo = filteredVideos[nextIdx];
+  showToast('info', '⏭️ Vidéo suivante !');
+  openWidget(nextVideo.id);
+}
+
+function closeWidget() {
+  const w = state.widget;
+  if (w.interval) clearInterval(w.interval);
+  w.active = false;
+  document.getElementById('floating-widget').classList.remove('active');
+}
+
+// =================== ORDERS LIVE ===================
+function updateOrderLive(videoId) {
+  const v = VIDEOS.find(v => v.id === videoId);
+  if (!v) return;
+  v.current = Math.min(v.current + Math.floor(Math.random() * 15 + 5), v.total);
+  const pct = (v.current / v.total * 100).toFixed(1);
+  const valEl = document.getElementById('tk-val-' + v.id);
+  const fillEl = document.getElementById('tk-fill-' + v.id);
+  if (valEl) valEl.textContent = v.current + ' / ' + v.total;
+  if (fillEl) fillEl.style.width = pct + '%';
+}
+
+function liveOrdersUpdate() {
+  setInterval(() => {
+    VIDEOS.forEach(v => {
+      if (Math.random() > 0.7) {
+        v.current = Math.min(v.current + Math.floor(Math.random() * 3), v.total);
+        const pct = (v.current / v.total * 100).toFixed(1);
+        const valEl = document.getElementById('tk-val-' + v.id);
+        const fillEl = document.getElementById('tk-fill-' + v.id);
+        if (valEl) valEl.textContent = v.current + ' / ' + v.total;
+        if (fillEl) fillEl.style.width = pct + '%';
+        // Orders tab
+        const oc1 = document.getElementById('oc1-val');
+        const oc1f = document.getElementById('oc1-fill');
+        if (oc1 && Math.random() > 0.5) {
+          const cur = parseInt(oc1.textContent) + 1;
+          oc1.textContent = Math.min(cur, 1000) + ' / 1000';
+          if (oc1f) oc1f.style.width = (Math.min(cur, 1000) / 10) + '%';
+        }
+      }
+    });
+  }, 5000);
+}
+
+// =================== POINTS ===================
+function addPoints(n) {
+  state.points += n;
+  state.todayPoints += n;
+  updateTopbarPoints();
+}
+
+// =================== SHOP ===================
+function buyPoints(amount, price) {
+  openWhatsApp(2, amount, price);
+}
+
+function buyPremium() {
+  openWhatsApp(3);
+}
+
+function openWhatsApp(type, amount, price) {
+  const base = 'https://wa.me/2250719082997?text=';
+  let msg = '';
+  if (type === 0) msg = 'Bonjour, je voudrais recharger mes Lv-UP sur NetViral.';
+  else if (type === 1) msg = 'Bonjour, j\'ai besoin d\'aide sur mon compte NetViral.';
+  else if (type === 2) msg = `Bonjour, je voudrais acheter ${amount} Lv-UP (${price.toLocaleString()} F CFA) sur NetViral. Mon username : ${state.user.name}`;
+  else if (type === 3) msg = 'Bonjour, je voudrais souscrire à NetViral Premium (2000 F CFA/mois). Mon username : ' + state.user.name;
+  window.open(base + encodeURIComponent(msg), '_blank');
+  showToast('info', '💬 Redirection vers WhatsApp...');
+}
+
+// =================== BOOST FORM ===================
+const BOOST_PRICES = {
+  views: {
+    TikTok: [{qty:'1 000',pts:5000},{qty:'5 000',pts:20000},{qty:'10 000',pts:35000},{qty:'50 000',pts:150000}],
+    YouTube: [{qty:'1 000 (Short)',pts:8000},{qty:'1 000 (Vidéo)',pts:10000},{qty:'10 000',pts:70000},{qty:'100 000',pts:500000}]
+  },
+  likes: {
+    TikTok: [{qty:'50',pts:1000},{qty:'200',pts:3500},{qty:'1 000',pts:15000},{qty:'5 000',pts:60000}],
+    YouTube: [{qty:'50',pts:2000},{qty:'200',pts:7000},{qty:'500',pts:15000},{qty:'2 000',pts:50000}]
+  },
+  shares: {
+    TikTok: [{qty:'50',pts:2000},{qty:'200',pts:7000},{qty:'1 000',pts:30000},{qty:'5 000',pts:120000}],
+    YouTube: [{qty:'50',pts:4000},{qty:'200',pts:14000},{qty:'500',pts:30000}]
+  },
+  comments: {
+    TikTok: [{qty:'50',pts:3000},{qty:'200',pts:10000},{qty:'1 000',pts:45000},{qty:'5 000',pts:180000}],
+    YouTube: [{qty:'50',pts:6000},{qty:'200',pts:20000},{qty:'500',pts:45000}]
+  },
+  followers: {
+    TikTok: [{qty:'100',pts:4000},{qty:'500',pts:18000},{qty:'1 000',pts:32000},{qty:'5 000',pts:140000}],
+    YouTube: [{qty:'100',pts:8000},{qty:'500',pts:35000},{qty:'1 000',pts:60000}]
+  }
+};
+
+let selectedBoostPrice = null;
+
+function openBoostForm(type, platform) {
+  state.currentBoostType = type;
+  state.currentBoostPlatform = platform;
+  selectedBoostPrice = null;
+  const names = { views:'vues', likes:'likes', shares:'partages', comments:'commentaires', followers:'followers' };
+  document.getElementById('bf-title').textContent = `Commander des ${names[type]}`;
+  document.getElementById('bf-sub').textContent = `${platform} · Sélectionne la quantité`;
+  const opts = BOOST_PRICES[type]?.[platform] || [];
+  const grid = document.getElementById('bf-options');
+  grid.innerHTML = '';
+  opts.forEach((opt, i) => {
+    const div = document.createElement('div');
+    div.className = 'price-opt';
+    div.innerHTML = `<div class="qty">${opt.qty}</div><div class="cost">${opt.pts.toLocaleString('fr-FR')} Lv-UP</div>`;
+    div.onclick = () => {
+      document.querySelectorAll('.price-opt').forEach(el => el.classList.remove('selected'));
+      div.classList.add('selected');
+      selectedBoostPrice = opt;
+    };
+    grid.appendChild(div);
+  });
+  document.getElementById('boost-form-overlay').classList.add('active');
+}
+
+function closeBoostForm() {
+  document.getElementById('boost-form-overlay').classList.remove('active');
+}
+
+function submitBoostOrder() {
+  if (!selectedBoostPrice) { showToast('error','⚠️ Sélectionne une quantité'); return; }
+  const url = document.getElementById('bf-url').value;
+  if (!url) { showToast('error','⚠️ Renseigne l\'URL de ta publication'); return; }
+  if (state.points < selectedBoostPrice.pts) {
+    showToast('error', `❌ Lv-UP insuffisants (besoin: ${selectedBoostPrice.pts.toLocaleString('fr-FR')})`);
+    return;
+  }
+  state.points -= selectedBoostPrice.pts;
+  updateTopbarPoints();
+  showToast('success', `🚀 Commande créée ! ${selectedBoostPrice.qty} ${state.currentBoostType}`);
+  closeBoostForm();
+  switchTab('orders');
+}
+
+// =================== ADMIN ===================
+function switchAdminTab(tab, btn) {
+  document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.a-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('admin-' + tab).classList.add('active');
+  btn.classList.add('active');
+}
+
+function approveUser(username) {
+  showToast('success', `✅ @${username} approuvé ! Email envoyé.`);
+  event.target.closest('.verif-card').style.opacity = '0.4';
+}
+
+function rejectUser(username) {
+  const reason = prompt('Raison du rejet :', 'Compte privé');
+  if (reason !== null) {
+    showToast('error', `❌ @${username} rejeté : ${reason}`);
+    event.target.closest('.verif-card').style.opacity = '0.4';
+  }
+}
+
+function approveRecharge(username, amount) {
+  showToast('success', `💎 +${amount} Lv-UP ajoutés à @${username} !`);
+  event.target.closest('.recharge-card').style.opacity = '0.4';
+}
+
+function rejectRecharge(username) {
+  showToast('error', `❌ Recharge @${username} rejetée.`);
+  event.target.closest('.recharge-card').style.opacity = '0.4';
+}
+
+function renderAdminUsers() {
+  const list = document.getElementById('admin-users-list');
+  const users = [
+    { name:'@kiddo_creator', pts: 2840, status:'✅ Vérifié' },
+    { name:'@alpha_creator', pts: 5200, status:'⏳ En attente' },
+    { name:'@dakar_lifestyle', pts: 1100, status:'✅ Vérifié' },
+    { name:'@tech_africa', pts: 8900, status:'✅ Vérifié' },
+    { name:'@viral_user22', pts: 340, status:'✅ Vérifié' },
+  ];
+  list.innerHTML = users.map(u => `
+    <div style="padding:10px 14px;border-bottom:1px solid var(--b1);display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center">
+      <span style="font-size:13px;font-weight:500">${u.name}</span>
+      <span style="font-size:13px;font-weight:700;color:var(--cyan)">${u.pts.toLocaleString('fr-FR')}</span>
+      <span style="font-size:11px;color:var(--t3)">${u.status}</span>
+    </div>
+  `).join('');
+}
+
+// =================== PROFILE ACTIONS ===================
+function copyPromo() {
+  navigator.clipboard.writeText(state.promoCode).catch(() => {});
+  showToast('success', '📋 Code promo copié ! ' + state.promoCode);
+}
+
+function showBonusInfo() {
+  showToast('info', '🎁 Connecte-toi 7j → Bonus aléatoire : jusqu\'à 100 follows, 1000 vues, 50 partages !');
+}
+
+function showSubInfo() {
+  showToast('info', state.isPremium ? '👑 Premium actif · Expire le 22/06/2026' : '👑 Pas encore premium. Achète dans Shop !');
+}
+
+function showNotifications() {
+  showToast('info', '🔔 Aucune nouvelle notification.');
+}
+
+function logout() {
+  if (confirm('Se déconnecter ?')) {
+    localStorage.removeItem('nv_verified');
+    goTo('login');
+  }
+}
+
+// =================== TOAST ===================
+function showToast(type, msg, duration = 3500) {
+  const wrap = document.getElementById('toastWrap');
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  const icons = { success:'✅', error:'❌', info:'💡' };
+  t.innerHTML = `<span class="toast-ico">${icons[type]||'💡'}</span><span class="toast-msg">${msg}</span>`;
+  wrap.appendChild(t);
+  setTimeout(() => {
+    t.classList.add('out');
+    setTimeout(() => t.remove(), 300);
+  }, duration);
+}
+
+// =================== INIT ===================
+// Check if already verified
+window.onload = () => {
+  const verified = localStorage.getItem('nv_verified');
+  if (verified === 'true') {
+    // Still show perms first
+  }
+};
+</script>
+</body>
+</html>
